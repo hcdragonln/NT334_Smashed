@@ -18,7 +18,7 @@ use App\MiningProp;
 class RefreshMiningProperties implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-  
+    public $timeout = 300;
     private $data;
     private $service;
     // private $miningProps;

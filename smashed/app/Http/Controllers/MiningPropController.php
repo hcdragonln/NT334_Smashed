@@ -67,9 +67,17 @@ class MiningPropController extends Controller
     public function refresh()
     {
         // dispatch job RefreshMiningProperties
+        //RefreshMiningProperties::dispatch();
+        set_time_limit(300);
+        //return redirect()->route('miningProp', ['dispatch' => true]);
+         try {
         RefreshMiningProperties::dispatch();
-
-        return redirect()->route('miningProp', ['dispatch' => true]);
+        return redirect()->route('miningProp', ['dispatch' => true])
+                         ->with('status', 'Refresh task has been initiated successfully.');
+             } catch (\Exception $e) {
+        \Log::error('Failed to dispatch RefreshMiningProperties job: ' . $e->getMessage());
+        return redirect()->route('miningProp')->withErrors('Unable to start the refresh process.');
+        }
     }
 
     /**

@@ -424,7 +424,6 @@ class RefreshService
 		    'Content-Length: ' . strlen($encodedData),
 			'X-Mining-Extensions: ' . $extensions)
 		);
-
 		// execute request
 		$response = curl_exec($ch);
 
@@ -479,7 +478,6 @@ class RefreshService
 			$result['reason'] = 'Undefined error';
 			$result['code'] = 0;
 		}
-
 		curl_close($ch);
 	    return $result;
 	}
