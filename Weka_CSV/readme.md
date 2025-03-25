@@ -1,5 +1,2 @@
-What is the purpose of file CSV?????
-what do I have to do?
-
-***
-?????IDS or something....?????
+CSV and weka training for IDS
+Sniff and extract pcap for predicting crypto-mining malware
