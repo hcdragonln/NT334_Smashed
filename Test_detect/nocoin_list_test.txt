@@ -1,0 +1,61 @@
+import pyshark
+import requests
+
+# URLs của danh sách NoCoin
+HOSTS_URL = "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"
+NOCOIN_URL = "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/nocoin.txt"
+
+def download_nocoin_lists():
+    """Tải danh sách NoCoin từ GitHub."""
+    print("[+] Đang tải danh sách NoCoin...")
+    hosts_data = requests.get(HOSTS_URL).text
+    nocoin_data = requests.get(NOCOIN_URL).text
+
+    # Phân tích dữ liệu từ danh sách
+    domains = set()
+    for line in hosts_data.splitlines():
+        if line.startswith("0.0.0.0"):
+            domains.add(line.split()[1])
+    for line in nocoin_data.splitlines():
+        if not line.startswith("!") and line.strip():
+            domains.add(line.strip())
+    print(f"[+] Đã tải {len(domains)} tên miền trong danh sách NoCoin.")
+    return domains
+
+def analyze_packets(interface, nocoin_domains):
+    """Phân tích gói tin từ Wireshark trên giao diện mạng."""
+    print(f"[+] Bắt đầu phân tích gói tin trên giao diện {interface}...")
+    capture = pyshark.LiveCapture(interface=interface,tshark_path = "G:/Wireshark/tshark.exe")
+
+    try:
+        for packet in capture.sniff_continuously():
+          try:
+            if 'ip' in packet:
+                ip_src = packet.ip.src
+                ip_dst = packet.ip.dst
+                host = None
+                
+                # Kiểm tra nếu có HTTP/HTTPS trong gói tin
+                if 'http' in packet:
+                    host = packet.http.host
+                elif 'tls' in packet:
+                    host = packet.tls.handshake_extensions_server_name
+                
+                # Kiểm tra IP/host với danh sách NoCoin
+                if host and any(domain in host for domain in nocoin_domains):
+                    print(f"[!] Phát hiện kết nối đáng ngờ: {host} (IP: {ip_src} -> {ip_dst})")
+          except AttributeError:
+            # Bỏ qua gói tin không hợp lệ
+            continue
+    except KeyboardInterrupt:
+        print("[+] Đã dừng phân tích gói tin.")
+
+if __name__ == "__main__":
+    # Tải danh sách NoCoin
+    nocoin_domains = download_nocoin_lists()
+
+    # Giao diện mạng cần phân tích (thay đổi theo hệ thống)
+    interface = "Wi-Fi"  # Hoặc "eth0", "en0", v.v.
+
+    # Phân tích lưu lượng mạng
+    analyze_packets(interface, nocoin_domains)
