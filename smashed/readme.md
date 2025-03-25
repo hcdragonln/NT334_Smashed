@@ -11,4 +11,4 @@ sMaSheD is a web application written in PHP with the help of the Laravel framewo
         php artisan db:seed //admin register (administrator--12345678)
         php artisan serve
 *****
-What is the purpose of the app?????
+Check connect to pool
